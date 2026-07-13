@@ -1,29 +1,22 @@
-from rich.console import Console
-from rich.panel import Panel
+from src.engines.google_maps_engine import GoogleMapsEngine
 
-from config.settings import APP_NAME, VERSION, HEADLESS
-from src.utils.browser import launch_browser
 
-console = Console()
+def main():
+    engine = GoogleMapsEngine()
 
-console.print(
-    Panel.fit(
-        f"[bold green]{APP_NAME}[/bold green]\n"
-        f"Version {VERSION}",
-        title="Starting",
+    leads = engine.search(
+        "Aluminium Extrusion Manufacturers Bangalore"
     )
-)
 
-playwright, browser, page = launch_browser(headless=HEADLESS)
+    print("\nResults\n")
 
-page.goto("https://www.google.com/maps")
+    for lead in leads:
+        print("--------------------------")
+        print(f"Name      : {lead.name}")
+        print(f"Category  : {lead.category}")
+        print(f"City      : {lead.city}")
+        print(f"Source    : {lead.source}")
 
-page.wait_for_timeout(5000)
 
-console.print("[green]Browser opened.[/green]")
-console.print("[yellow]Playwright Inspector is opening...[/yellow]")
-
-page.pause()
-
-browser.close()
-playwright.stop()
+if __name__ == "__main__":
+    main()
