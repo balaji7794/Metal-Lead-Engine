@@ -3,6 +3,7 @@ from src.engines.google_maps_scraper import GoogleMapsScraper
 from src.exporters.excel_exporter import ExcelExporter
 from src.services.lead_service import LeadService
 from src.services.website_intelligence_service import WebsiteIntelligenceService
+from src.services.product_intelligence_service import ProductIntelligenceService
 
 
 def main():
@@ -48,6 +49,16 @@ def main():
     website_service.run()
 
     website_service.close()
+
+    # -------------------------------
+    # Product Intelligence
+    # -------------------------------
+
+    product_service = ProductIntelligenceService()
+
+    product_service.run()
+
+    product_service.close()
 
     # -------------------------------
     # Export Excel
