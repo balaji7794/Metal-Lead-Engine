@@ -2,13 +2,22 @@ from src.database.migration import Migration
 from src.engines.google_maps_scraper import GoogleMapsScraper
 from src.exporters.excel_exporter import ExcelExporter
 from src.services.lead_service import LeadService
+from src.services.website_intelligence_service import WebsiteIntelligenceService
 
 
 def main():
 
+    # -------------------------------
+    # Run Database Migrations
+    # -------------------------------
+
     migration = Migration()
     migration.run()
     migration.close()
+
+    # -------------------------------
+    # Google Maps Scraper
+    # -------------------------------
 
     scraper = GoogleMapsScraper()
 
@@ -20,15 +29,37 @@ def main():
 
     leads = scraper.scrape_all()
 
-    service = LeadService()
+    # -------------------------------
+    # Save Companies
+    # -------------------------------
 
-    service.save(leads)
+    lead_service = LeadService()
+
+    lead_service.save(leads)
+
+    lead_service.close()
+
+    # -------------------------------
+    # Website Intelligence
+    # -------------------------------
+
+    website_service = WebsiteIntelligenceService()
+
+    website_service.run()
+
+    website_service.close()
+
+    # -------------------------------
+    # Export Excel
+    # -------------------------------
 
     exporter = ExcelExporter()
 
     exporter.export(leads)
 
-    service.close()
+    # -------------------------------
+    # Close Browser
+    # -------------------------------
 
     scraper.stop()
 

@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Metal Lead Engine
+database/*.db
+output/
+company_page.html
+
+*.xlsx
+*.html
+
+__pycache__/

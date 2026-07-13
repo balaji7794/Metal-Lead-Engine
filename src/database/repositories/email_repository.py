@@ -12,6 +12,38 @@ class EmailRepository:
         if not email:
             return
 
+        email = email.strip().lower()
+
+        # Ignore obvious junk emails
+
+        blocked = [
+
+            "sentry",
+
+            "wixpress",
+
+            "example@",
+
+            ".jpg",
+
+            ".jpeg",
+
+            ".png",
+
+            ".svg",
+
+            ".webp",
+
+            "font"
+
+        ]
+
+        for word in blocked:
+
+            if word in email:
+
+                return
+
         self.db.cursor.execute("""
 
         SELECT id
@@ -20,11 +52,18 @@ class EmailRepository:
 
         WHERE company_id=?
 
-        AND email=?
+        AND LOWER(email)=?
 
-        """,(company_id, email))
+        """, (
+
+            company_id,
+
+            email
+
+        ))
 
         if self.db.cursor.fetchone():
+
             return
 
         self.db.cursor.execute("""
@@ -37,13 +76,15 @@ class EmailRepository:
 
             department,
 
-            is_primary
+            is_primary,
+
+            verified
 
         )
 
-        VALUES(?,?,?,?)
+        VALUES(?,?,?,?,?)
 
-        """,(
+        """, (
 
             company_id,
 
@@ -51,8 +92,16 @@ class EmailRepository:
 
             "General",
 
-            1
+            0,
+
+            0
 
         ))
 
         self.db.conn.commit()
+
+        print(f"      ✓ Saved : {email}")
+
+    def close(self):
+
+        self.db.close()
