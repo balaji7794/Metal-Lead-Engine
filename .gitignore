@@ -223,6 +223,5 @@ output/
 company_page.html
 
 *.xlsx
-*.html
 
 __pycache__/

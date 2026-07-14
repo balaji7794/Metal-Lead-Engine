@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">
+
+Search Companies
+
+</h2>
+
+<div class="card shadow-sm p-4 mb-4">
+
+<form method="POST" action="/search/start">
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">Keyword</label>
+
+<input
+
+class="form-control"
+
+type="text"
+
+name="keyword"
+
+placeholder="Aluminium Extrusion Manufacturers"
+
+required>
+
+</div>
+
+<div class="col-md-6 mb-3">
+
+<label class="form-label">Area</label>
+
+<input
+
+class="form-control"
+
+type="text"
+
+name="area"
+
+placeholder="Peenya">
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">City</label>
+
+<input
+
+class="form-control"
+
+type="text"
+
+name="city"
+
+placeholder="Bangalore">
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">State</label>
+
+<input
+
+class="form-control"
+
+type="text"
+
+name="state"
+
+placeholder="Karnataka">
+
+</div>
+
+<div class="col-md-4 mb-3">
+
+<label class="form-label">Radius (KM)</label>
+
+<input
+
+class="form-control"
+
+type="number"
+
+name="radius"
+
+value="10">
+
+</div>
+
+</div>
+
+<button
+
+class="btn btn-success btn-lg">
+
+🚀 START SEARCH
+
+</button>
+
+</form>
+
+</div>
+
+<div class="card shadow-sm">
+
+<div class="card-header">
+
+<b>Live Search Progress</b>
+
+</div>
+
+<div class="card-body">
+
+<h5 id="stage">
+
+Idle
+
+</h5>
+
+<div class="progress mb-3" style="height:25px;">
+
+<div
+
+id="progressBar"
+
+class="progress-bar progress-bar-striped progress-bar-animated"
+
+style="width:0%;">
+
+0%
+
+</div>
+
+</div>
+
+<table class="table">
+
+<tr>
+
+<th width="180">
+
+Current Stage
+
+</th>
+
+<td id="stage2">
+
+Waiting...
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Message
+
+</th>
+
+<td id="message">
+
+Waiting...
+
+</td>
+
+</tr>
+
+<tr>
+
+<th>
+
+Progress
+
+</th>
+
+<td id="progress">
+
+0 / 0
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+function refreshStatus(){
+
+fetch("/search/status")
+
+.then(r=>r.json())
+
+.then(data=>{
+
+const current=data.current||0;
+
+const total=data.total||0;
+
+const percent=total>0?Math.round(current*100/total):0;
+
+document.getElementById("stage").innerText=data.stage||"Idle";
+
+document.getElementById("stage2").innerText=data.stage||"Idle";
+
+document.getElementById("message").innerText=data.message||"";
+
+document.getElementById("progress").innerText=current+" / "+total;
+
+document.getElementById("progressBar").style.width=percent+"%";
+
+document.getElementById("progressBar").innerText=percent+"%";
+
+if(data.stage==="Completed"){
+
+document.getElementById("progressBar").classList.remove("progress-bar-animated");
+
+setTimeout(function(){
+
+window.location="/companies";
+
+},1200);
+
+}
+
+});
+
+}
+
+setInterval(refreshStatus,1000);
+
+refreshStatus();
+
+</script>
+
+{% endblock %}

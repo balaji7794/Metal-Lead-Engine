@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2>Companies</h2>
+
+    <span class="badge bg-primary fs-6">
+
+        Total : {{ companies|length }}
+
+    </span>
+
+</div>
+
+<form method="GET" action="/companies">
+
+<div class="row mb-4">
+
+<div class="col-md-6">
+
+<input
+
+class="form-control"
+
+type="text"
+
+name="q"
+
+placeholder="Search Company / City / State / Category"
+
+value="{{ keyword }}">
+
+</div>
+
+<div class="col-md-3">
+
+<select
+
+class="form-select"
+
+name="sort">
+
+<option value="newest" {% if sort=="newest" %}selected{% endif %}>Newest Added</option>
+
+<option value="oldest" {% if sort=="oldest" %}selected{% endif %}>Oldest Added</option>
+
+<option value="az" {% if sort=="az" %}selected{% endif %}>Company A-Z</option>
+
+<option value="za" {% if sort=="za" %}selected{% endif %}>Company Z-A</option>
+
+<option value="rating" {% if sort=="rating" %}selected{% endif %}>Highest Rating</option>
+
+<option value="reviews" {% if sort=="reviews" %}selected{% endif %}>Most Reviews</option>
+
+</select>
+
+</div>
+
+<div class="col-md-3 d-grid">
+
+<button class="btn btn-primary">
+
+🔍 Search
+
+</button>
+
+</div>
+
+</div>
+
+</form>
+
+<div class="card shadow-sm">
+
+<div class="table-responsive">
+
+<table class="table table-hover align-middle mb-0">
+
+<thead class="table-light">
+
+<tr>
+
+<th width="30%">Company</th>
+
+<th>City</th>
+
+<th>Category</th>
+
+<th class="text-center">Website</th>
+
+<th class="text-center">Status</th>
+
+<th class="text-center">Priority</th>
+
+<th width="110">Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for company in companies %}
+
+<tr>
+
+<td>
+
+<strong>{{ company.company_name }}</strong>
+
+<br>
+
+<small class="text-muted">
+
+⭐ {{ company.rating or "-" }}
+
+&nbsp;&nbsp;
+
+📝 {{ company.reviews or 0 }}
+
+</small>
+
+</td>
+
+<td>
+
+{{ company.city or "-" }}
+
+</td>
+
+<td>
+
+<span class="badge bg-secondary">
+
+{{ company.category or "-" }}
+
+</span>
+
+</td>
+
+<td class="text-center">
+
+{% if company.website %}
+
+<a
+
+class="btn btn-sm btn-outline-primary"
+
+href="{{ company.website }}"
+
+target="_blank">
+
+🌐
+
+</a>
+
+{% else %}
+
+—
+
+{% endif %}
+
+</td>
+
+<td class="text-center">
+
+{% set status = company.lead_status or "New" %}
+
+{% if status=="Interested" %}
+
+<span class="badge bg-success">{{ status }}</span>
+
+{% elif status=="Follow Up" %}
+
+<span class="badge bg-warning text-dark">{{ status }}</span>
+
+{% elif status=="Closed" %}
+
+<span class="badge bg-dark">{{ status }}</span>
+
+{% elif status=="Called" %}
+
+<span class="badge bg-info text-dark">{{ status }}</span>
+
+{% else %}
+
+<span class="badge bg-secondary">{{ status }}</span>
+
+{% endif %}
+
+</td>
+
+<td class="text-center">
+
+{% set priority = company.priority or "Medium" %}
+
+{% if priority=="High" %}
+
+<span class="badge bg-danger">High</span>
+
+{% elif priority=="Medium" %}
+
+<span class="badge bg-warning text-dark">Medium</span>
+
+{% else %}
+
+<span class="badge bg-success">Low</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+<a
+
+class="btn btn-success btn-sm w-100"
+
+href="/company/{{ company.id }}">
+
+Open →
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

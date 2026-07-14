@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">
+
+Dashboard
+
+</h2>
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-3">
+
+<div class="card text-center shadow-sm">
+
+<div class="card-body">
+
+<h6>Total Companies</h6>
+
+<h2>{{ total_companies }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card text-center shadow-sm">
+
+<div class="card-body">
+
+<h6>Websites</h6>
+
+<h2>{{ stats.websites }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card text-center shadow-sm">
+
+<div class="card-body">
+
+<h6>Emails</h6>
+
+<h2>{{ stats.emails }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card text-center shadow-sm">
+
+<div class="card-body">
+
+<h6>Phones</h6>
+
+<h2>{{ stats.phones }}</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+<div class="col-md-3">
+
+<div class="card border-primary text-center">
+
+<div class="card-body">
+
+<h6>New</h6>
+
+<h3>{{ stats.new }}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-success text-center">
+
+<div class="card-body">
+
+<h6>Interested</h6>
+
+<h3>{{ stats.interested }}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-warning text-center">
+
+<div class="card-body">
+
+<h6>Follow Up</h6>
+
+<h3>{{ stats.followup }}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card border-dark text-center">
+
+<div class="card-body">
+
+<h6>Closed</h6>
+
+<h3>{{ stats.closed }}</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card shadow-sm">
+
+<div class="card-header">
+
+<strong>Latest Companies</strong>
+
+</div>
+
+<div class="table-responsive">
+
+<table class="table table-hover mb-0">
+
+<thead>
+
+<tr>
+
+<th>Company</th>
+
+<th>City</th>
+
+<th>Category</th>
+
+<th></th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for company in companies[:10] %}
+
+<tr>
+
+<td>{{ company.company_name }}</td>
+
+<td>{{ company.city }}</td>
+
+<td>{{ company.category }}</td>
+
+<td>
+
+<a class="btn btn-success btn-sm"
+
+href="/company/{{ company.id }}">
+
+Open
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+{% endblock %}

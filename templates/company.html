@@ -1,0 +1,445 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <h2>{{ company.company_name }}</h2>
+
+    <a href="/companies" class="btn btn-secondary">
+
+        ← Back
+
+    </a>
+
+</div>
+
+<div class="row">
+
+    <!-- ===================================================== -->
+    <!-- COMPANY -->
+    <!-- ===================================================== -->
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <strong>Company Information</strong>
+
+            </div>
+
+            <div class="card-body">
+
+                <table class="table table-bordered">
+
+                    <tr>
+                        <th width="180">Category</th>
+                        <td>{{ company.category }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Address</th>
+                        <td>{{ company.address }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>City</th>
+                        <td>{{ company.city }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>State</th>
+                        <td>{{ company.state }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Website</th>
+                        <td>
+
+                            {% if company.website %}
+
+                            <a href="{{ company.website }}" target="_blank">
+
+                                {{ company.website }}
+
+                            </a>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    <tr>
+
+                        <th>Google Maps</th>
+
+                        <td>
+
+                            {% if company.google_maps_url %}
+
+                            <a href="{{ company.google_maps_url }}" target="_blank">
+
+                                Open Maps
+
+                            </a>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- CRM -->
+    <!-- ===================================================== -->
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <strong>CRM</strong>
+
+            </div>
+
+            <div class="card-body">
+
+                <form
+
+                    method="POST"
+
+                    action="/company/{{ company.id }}/save"
+
+                >
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Lead Status
+
+                        </label>
+
+                        <select
+
+                            class="form-select"
+
+                            name="lead_status"
+
+                        >
+
+                            {% for s in ["New","Called","Interested","Follow Up","Qualified","Closed"] %}
+
+                            <option
+
+                                value="{{ s }}"
+
+                                {% if company.lead_status==s %}selected{% endif %}
+
+                            >
+
+                                {{ s }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Priority
+
+                        </label>
+
+                        <select
+
+                            class="form-select"
+
+                            name="priority"
+
+                        >
+
+                            {% for p in ["High","Medium","Low"] %}
+
+                            <option
+
+                                value="{{ p }}"
+
+                                {% if company.priority==p %}selected{% endif %}
+
+                            >
+
+                                {{ p }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Last Contacted
+
+                        </label>
+
+                        <input
+
+                            type="date"
+
+                            class="form-control"
+
+                            name="last_contacted"
+
+                            value="{{ company.last_contacted or '' }}"
+
+                        >
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Next Follow Up
+
+                        </label>
+
+                        <input
+
+                            type="date"
+
+                            class="form-control"
+
+                            name="next_followup"
+
+                            value="{{ company.next_followup or '' }}"
+
+                        >
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Remarks
+
+                        </label>
+
+                        <textarea
+
+                            rows="6"
+
+                            class="form-control"
+
+                            name="remarks"
+
+                        >{{ company.remarks or "" }}</textarea>
+
+                    </div>
+
+                    <button
+
+                        class="btn btn-success"
+
+                        type="submit"
+
+                    >
+
+                        Save CRM
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row">
+
+    <!-- ===================================================== -->
+    <!-- EMAILS -->
+    <!-- ===================================================== -->
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <strong>Emails</strong>
+
+            </div>
+
+            <div class="card-body">
+
+                {% if emails %}
+
+                <table class="table table-sm">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>Email</th>
+
+                        <th>Department</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for email in emails %}
+
+                    <tr>
+
+                        <td>
+
+                            <a href="mailto:{{ email.email }}">
+
+                                {{ email.email }}
+
+                            </a>
+
+                        </td>
+
+                        <td>
+
+                            {{ email.department }}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                {% else %}
+
+                <p class="text-muted">
+
+                    No Emails Found
+
+                </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- PHONES -->
+    <!-- ===================================================== -->
+
+    <div class="col-lg-6">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+
+                <strong>Phone Numbers</strong>
+
+            </div>
+
+            <div class="card-body">
+
+                {% if phones %}
+
+                <table class="table table-sm">
+
+                    <thead>
+
+                    <tr>
+
+                        <th>Phone</th>
+
+                        <th>Type</th>
+
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for phone in phones %}
+
+                    <tr>
+
+                        <td>
+
+                            <a href="tel:{{ phone.phone }}">
+
+                                {{ phone.phone }}
+
+                            </a>
+
+                        </td>
+
+                        <td>
+
+                            {{ phone.phone_type }}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                {% else %}
+
+                <p class="text-muted">
+
+                    No Phone Numbers Found
+
+                </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
