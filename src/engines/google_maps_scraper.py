@@ -15,11 +15,17 @@ class GoogleMapsScraper:
         self.playwright = sync_playwright().start()
 
         self.browser = self.playwright.chromium.launch(
-            headless=False
+            headless=True,
+            args=[
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu"
+            ]
         )
 
         self.page = self.browser.new_page(
-            viewport={"width": 1600, "height": 900}
+            viewport={"width":1600,"height":900},
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138.0.0.0 Safari/537.36"
         )
 
     def search(self, keyword):
