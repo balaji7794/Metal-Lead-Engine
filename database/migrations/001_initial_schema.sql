@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS companies (
 
     google_maps_url TEXT UNIQUE,
 
+    website TEXT,
+
+    phone TEXT,
+
+    email TEXT,
+
     address TEXT,
 
     city TEXT,
@@ -32,6 +38,10 @@ CREATE TABLE IF NOT EXISTS companies (
 
     msme_type TEXT,
 
+    products TEXT,
+
+    scrap_generated TEXT,
+
     estimated_consumption_mt REAL,
 
     estimated_scrap_mt REAL,
@@ -41,6 +51,18 @@ CREATE TABLE IF NOT EXISTS companies (
     reviews INTEGER,
 
     source TEXT,
+
+    notes TEXT,
+
+    lead_status TEXT DEFAULT 'New',
+
+    priority TEXT DEFAULT 'Medium',
+
+    last_contacted TEXT,
+
+    next_followup TEXT,
+
+    remarks TEXT,
 
     status TEXT DEFAULT 'ACTIVE',
 
