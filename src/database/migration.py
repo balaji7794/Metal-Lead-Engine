@@ -20,13 +20,25 @@ class Migration:
 
         for sql_file in sql_files:
 
-            print(f"Running Migration : {sql_file.name}")
+            try:
 
-            sql = sql_file.read_text(encoding="utf-8")
+                print(f"Running Migration : {sql_file.name}")
 
-            cursor.executescript(sql)
+                sql = sql_file.read_text(encoding="utf-8")
 
-        self.conn.commit()
+                cursor.executescript(sql)
+
+                self.conn.commit()
+
+            except sqlite3.OperationalError as e:
+
+                if "duplicate column name" in str(e).lower():
+
+                    print(f"Skipping : {sql_file.name}")
+
+                    continue
+
+                raise
 
         print("\n✅ Database Ready")
 

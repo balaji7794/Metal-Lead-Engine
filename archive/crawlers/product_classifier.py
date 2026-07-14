@@ -17,14 +17,16 @@ class ProductClassifier:
         self.article_words = {
             "how", "why", "benefits", "advantage", "advantages",
             "application", "applications", "guide", "introduction",
-            "overview", "tips", "blog", "article"
+            "overview", "tips", "blog", "article",
+            "learn", "selecting", "selection", "choosing"
         }
 
         self.process_words = {
             "heat", "cool", "cut", "drill", "machine",
             "homogenise", "homogenize", "extrude",
             "pack", "bundle", "protect",
-            "load", "unload", "furnace"
+            "load", "unload", "furnace",
+            "welding", "fabrication", "assembly"
         }
 
         self.contact_words = {
@@ -40,7 +42,10 @@ class ProductClassifier:
             "company profile",
             "history",
             "vision",
-            "mission"
+            "mission",
+            "factsheet",
+            "testimonial",
+            "careers"
         }
 
         self.seo_words = {
@@ -56,7 +61,9 @@ class ProductClassifier:
             "distributors",
             "near me",
             "best",
-            "top"
+            "top",
+            "buy",
+            "sale"
         }
 
         self.product_words = {
@@ -92,31 +99,63 @@ class ProductClassifier:
             "screw"
         }
 
+        self.reject_contains = {
+            "@",
+            "http://",
+            "https://",
+            "www.",
+            "youtube",
+            "gallery",
+            "download",
+            "catalogue",
+            "catalog",
+            "brochure",
+            "pdf",
+            "read more",
+            "click here",
+            "visit",
+            "login",
+            "register",
+            "privacy",
+            "terms",
+            "cookie",
+            "news",
+            "events"
+        }
+
     def classify(self, text):
 
         if not text:
             return self.UNKNOWN, 0
 
-        text = text.strip()
+        text = re.sub(r"\s+", " ", text).strip()
         lower = text.lower()
 
-        # -----------------------------
-        # Hard Rejects
-        # -----------------------------
+        # -------------------------
+        # Hard Reject
+        # -------------------------
 
-        if "@" in lower:
-            return self.CONTACT, 0
-
-        if "http://" in lower or "https://" in lower:
-            return self.CONTACT, 0
-
-        if "www." in lower:
-            return self.CONTACT, 0
+        for word in self.reject_contains:
+            if word in lower:
+                return self.UNKNOWN, 0
 
         if re.fullmatch(r"[0-9+\-\s]+", lower):
-            return self.CONTACT, 0
+            return self.UNKNOWN, 0
 
-        scores = {
+        words = lower.split()
+
+        if len(words) == 1:
+            if words[0] in {
+                "products",
+                "profile",
+                "profiles",
+                "home",
+                "about",
+                "contact"
+            }:
+                return self.UNKNOWN, 0
+
+        score = {
             self.PRODUCT: 0,
             self.ACCESSORY: 0,
             self.PROCESS: 0,
@@ -126,67 +165,86 @@ class ProductClassifier:
             self.SEO: 0
         }
 
-        # -----------------------------
-        # Word Scores
-        # -----------------------------
+        # Product
 
         for word in self.product_words:
             if word in lower:
-                scores[self.PRODUCT] += 50
+                score[self.PRODUCT] += 50
+
+        # Accessory
 
         for word in self.accessory_words:
             if word in lower:
-                scores[self.ACCESSORY] += 45
+                score[self.ACCESSORY] += 45
+
+        # Process
 
         for word in self.process_words:
             if word in lower:
-                scores[self.PROCESS] += 40
+                score[self.PROCESS] += 45
+
+        # Article
 
         for word in self.article_words:
             if word in lower:
-                scores[self.ARTICLE] += 40
+                score[self.ARTICLE] += 45
+
+        # Company
 
         for word in self.company_words:
             if word in lower:
-                scores[self.COMPANY] += 40
+                score[self.COMPANY] += 45
+
+        # Contact
 
         for word in self.contact_words:
             if word in lower:
-                scores[self.CONTACT] += 40
+                score[self.CONTACT] += 45
+
+        # SEO
 
         for word in self.seo_words:
             if word in lower:
-                scores[self.SEO] += 45
+                score[self.SEO] += 45
 
-        # -----------------------------
-        # Positive Signals
-        # -----------------------------
+        # Positive signals
 
         if "aluminium" in lower or "aluminum" in lower:
-            scores[self.PRODUCT] += 15
+            score[self.PRODUCT] += 15
 
-        words = len(lower.split())
+        if 2 <= len(words) <= 6:
+            score[self.PRODUCT] += 20
 
-        if 2 <= words <= 6:
-            scores[self.PRODUCT] += 20
-
-        elif words > 12:
-            scores[self.ARTICLE] += 20
+        if len(words) > 10:
+            score[self.ARTICLE] += 20
 
         if ":" in lower:
-            scores[self.ARTICLE] += 15
+            score[self.ARTICLE] += 20
 
         if ";" in lower:
-            scores[self.ARTICLE] += 20
+            score[self.ARTICLE] += 20
 
-        # -----------------------------
-        # Decide Winner
-        # -----------------------------
+        # Priority overrides
 
-        winner = max(scores, key=scores.get)
-        confidence = scores[winner]
+        if score[self.ARTICLE] >= 45:
+            return self.ARTICLE, score[self.ARTICLE]
 
-        if confidence < 40:
-            return self.UNKNOWN, confidence
+        if score[self.PROCESS] >= 45:
+            return self.PROCESS, score[self.PROCESS]
 
-        return winner, min(confidence, 100)
+        if score[self.COMPANY] >= 45:
+            return self.COMPANY, score[self.COMPANY]
+
+        if score[self.CONTACT] >= 45:
+            return self.CONTACT, score[self.CONTACT]
+
+        if score[self.SEO] >= 45 and score[self.PRODUCT] < 70:
+            return self.SEO, score[self.SEO]
+
+        if score[self.ACCESSORY] >= 45:
+            return self.ACCESSORY, min(score[self.ACCESSORY], 100)
+
+        if score[self.PRODUCT] >= 60:
+            return self.PRODUCT, min(score[self.PRODUCT], 100)
+
+        return self.UNKNOWN, 0

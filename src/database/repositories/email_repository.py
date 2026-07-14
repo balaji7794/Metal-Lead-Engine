@@ -7,6 +7,10 @@ class EmailRepository:
 
         self.db = Database()
 
+    # =====================================================
+    # SAVE
+    # =====================================================
+
     def save(self, company_id, email):
 
         if not email:
@@ -14,34 +18,23 @@ class EmailRepository:
 
         email = email.strip().lower()
 
-        # Ignore obvious junk emails
-
-        blocked = [
+        blocked = {
 
             "sentry",
-
             "wixpress",
-
             "example@",
-
             ".jpg",
-
             ".jpeg",
-
             ".png",
-
             ".svg",
-
             ".webp",
-
             "font"
 
-        ]
+        }
 
         for word in blocked:
 
             if word in email:
-
                 return
 
         self.db.cursor.execute("""
@@ -51,7 +44,6 @@ class EmailRepository:
         FROM company_emails
 
         WHERE company_id=?
-
         AND LOWER(email)=?
 
         """, (
@@ -71,13 +63,9 @@ class EmailRepository:
         INSERT INTO company_emails(
 
             company_id,
-
             email,
-
             department,
-
             is_primary,
-
             verified
 
         )
@@ -87,20 +75,104 @@ class EmailRepository:
         """, (
 
             company_id,
-
             email,
-
             "General",
-
             0,
-
             0
 
         ))
 
         self.db.conn.commit()
 
-        print(f"      ✓ Saved : {email}")
+        print(f"      ✓ Email Saved : {email}")
+
+    # =====================================================
+    # READ
+    # =====================================================
+
+    def get_by_company(self, company_id):
+
+        self.db.cursor.execute("""
+
+        SELECT *
+
+        FROM company_emails
+
+        WHERE company_id=?
+
+        ORDER BY
+
+            is_primary DESC,
+
+            email
+
+        """, (
+
+            company_id,
+
+        ))
+
+        return self.db.cursor.fetchall()
+
+    # =====================================================
+    # DELETE
+    # =====================================================
+
+    def delete(self, email_id):
+
+        self.db.cursor.execute("""
+
+        DELETE FROM company_emails
+
+        WHERE id=?
+
+        """, (
+
+            email_id,
+
+        ))
+
+        self.db.conn.commit()
+
+    # =====================================================
+    # PRIMARY
+    # =====================================================
+
+    def set_primary(self, company_id, email_id):
+
+        self.db.cursor.execute("""
+
+        UPDATE company_emails
+
+        SET is_primary=0
+
+        WHERE company_id=?
+
+        """, (
+
+            company_id,
+
+        ))
+
+        self.db.cursor.execute("""
+
+        UPDATE company_emails
+
+        SET is_primary=1
+
+        WHERE id=?
+
+        """, (
+
+            email_id,
+
+        ))
+
+        self.db.conn.commit()
+
+    # =====================================================
+    # CLOSE
+    # =====================================================
 
     def close(self):
 

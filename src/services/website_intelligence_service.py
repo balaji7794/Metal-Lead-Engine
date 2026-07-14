@@ -13,22 +13,38 @@ class WebsiteIntelligenceService:
         self.phone_repo = PhoneRepository()
         self.crawler = WebsiteCrawler()
 
-    def run(self):
+    def run(self, company_ids, progress=None):
 
-        websites = self.website_repo.get_all_websites()
+        websites = self.website_repo.get_websites_by_company_ids(company_ids)
 
-        print("\n" + "=" * 60)
+        print()
+        print("=" * 60)
         print("WEBSITE INTELLIGENCE")
         print("=" * 60)
+        print()
 
-        print(f"\nWebsites Found : {len(websites)}\n")
+        print(f"Websites Found : {len(websites)}")
+        print()
+
+        total = len(websites)
 
         for index, row in enumerate(websites, start=1):
 
             company_id = row["company_id"]
             website = row["website"]
 
-            print(f"[{index}/{len(websites)}] {website}")
+            # ----------------------------------------
+            # Live Progress
+            # ----------------------------------------
+
+            if progress is not None:
+
+                progress["stage"] = "Website Intelligence"
+                progress["current"] = index
+                progress["total"] = total
+                progress["message"] = website
+
+            print(f"[{index}/{total}] {website}")
 
             html = self.crawler.download(website)
 
@@ -38,9 +54,9 @@ class WebsiteIntelligenceService:
             all_emails = set()
             all_phones = set()
 
-            # -----------------------------
+            # ----------------------------------------
             # Homepage
-            # -----------------------------
+            # ----------------------------------------
 
             all_emails.update(
 
@@ -54,9 +70,9 @@ class WebsiteIntelligenceService:
 
             )
 
-            # -----------------------------
-            # Important Pages
-            # -----------------------------
+            # ----------------------------------------
+            # Contact Page Only
+            # ----------------------------------------
 
             pages = self.crawler.discover_pages(
 
@@ -66,9 +82,13 @@ class WebsiteIntelligenceService:
 
             )
 
-            print(f"   Important Pages : {len(pages)}")
+            print(f"   Contact Pages : {len(pages)}")
 
             for page in pages:
+
+                if progress is not None:
+
+                    progress["message"] = page
 
                 result = self.crawler.crawl_page(page)
 
@@ -87,11 +107,9 @@ class WebsiteIntelligenceService:
 
                 )
 
-            # -----------------------------
+            # ----------------------------------------
             # Save Emails
-            # -----------------------------
-
-            email_count = 0
+            # ----------------------------------------
 
             for email in sorted(all_emails):
 
@@ -103,13 +121,9 @@ class WebsiteIntelligenceService:
 
                 )
 
-                email_count += 1
-
-            # -----------------------------
+            # ----------------------------------------
             # Save Phones
-            # -----------------------------
-
-            phone_count = 0
+            # ----------------------------------------
 
             for phone in sorted(all_phones):
 
@@ -121,27 +135,8 @@ class WebsiteIntelligenceService:
 
                 )
 
-                phone_count += 1
-
-            print(f"   Emails : {email_count}")
-            print(f"   Phones : {phone_count}")
-
-            if email_count:
-
-                print("\n   EMAILS")
-
-                for email in sorted(all_emails):
-
-                    print(f"      • {email}")
-
-            if phone_count:
-
-                print("\n   PHONES")
-
-                for phone in sorted(all_phones):
-
-                    print(f"      • {phone}")
-
+            print(f"   Emails : {len(all_emails)}")
+            print(f"   Phones : {len(all_phones)}")
             print()
 
         print("=" * 60)

@@ -1,80 +1,105 @@
 from src.database.migration import Migration
 from src.engines.google_maps_scraper import GoogleMapsScraper
-from src.exporters.excel_exporter import ExcelExporter
 from src.services.lead_service import LeadService
 from src.services.website_intelligence_service import WebsiteIntelligenceService
-from src.services.product_intelligence_service import ProductIntelligenceService
 
 
 def main():
 
-    # -------------------------------
-    # Run Database Migrations
-    # -------------------------------
+    print("=" * 70)
+    print("METAL LEAD ENGINE V1")
+    print("=" * 70)
+
+    # -------------------------------------------------
+    # Database
+    # -------------------------------------------------
 
     migration = Migration()
     migration.run()
     migration.close()
 
-    # -------------------------------
-    # Google Maps Scraper
-    # -------------------------------
+    # -------------------------------------------------
+    # Search Input
+    # -------------------------------------------------
+
+    keyword = input("Keyword : ").strip()
+
+    area = input("Area : ").strip()
+
+    city = input("City : ").strip()
+
+    state = input("State : ").strip()
+
+    radius = input("Radius (KM) : ").strip()
+
+    if not radius:
+        radius = "10"
+
+    search_query = keyword
+
+    if area:
+        search_query += f" {area}"
+
+    if city:
+        search_query += f" {city}"
+
+    if state:
+        search_query += f" {state}"
+
+    print()
+    print("Searching...")
+    print(search_query)
+    print()
+
+    # -------------------------------------------------
+    # Google Maps Search
+    # -------------------------------------------------
 
     scraper = GoogleMapsScraper()
 
     scraper.start()
 
-    scraper.search(
-        "Aluminium Extrusion Manufacturers Bangalore"
-    )
+    scraper.search(search_query)
 
     leads = scraper.scrape_all()
 
-    # -------------------------------
+    scraper.stop()
+
+    print()
+    print(f"Companies Found : {len(leads)}")
+    print()
+
+    # -------------------------------------------------
     # Save Companies
-    # -------------------------------
+    # -------------------------------------------------
 
     lead_service = LeadService()
 
-    lead_service.save(leads)
+    company_ids = lead_service.save(leads)
 
     lead_service.close()
 
-    # -------------------------------
+    # -------------------------------------------------
     # Website Intelligence
-    # -------------------------------
+    # -------------------------------------------------
 
     website_service = WebsiteIntelligenceService()
 
-    website_service.run()
+    website_service.run(company_ids)
 
     website_service.close()
 
-    # -------------------------------
-    # Product Intelligence
-    # -------------------------------
+    # -------------------------------------------------
+    # Finished
+    # -------------------------------------------------
 
-    product_service = ProductIntelligenceService()
+    print()
+    print("=" * 70)
+    print("SEARCH COMPLETED")
+    print("=" * 70)
+    print()
 
-    product_service.run()
-
-    product_service.close()
-
-    # -------------------------------
-    # Export Excel
-    # -------------------------------
-
-    exporter = ExcelExporter()
-
-    exporter.export(leads)
-
-    # -------------------------------
-    # Close Browser
-    # -------------------------------
-
-    scraper.stop()
-
-    input("\nDone. Press ENTER to close...")
+    input("Press ENTER to close...")
 
 
 if __name__ == "__main__":

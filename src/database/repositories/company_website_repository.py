@@ -7,9 +7,14 @@ class CompanyWebsiteRepository:
 
         self.db = Database()
 
-    def get_all_websites(self):
+    def get_websites_by_company_ids(self, company_ids):
 
-        self.db.cursor.execute("""
+        if not company_ids:
+            return []
+
+        placeholders = ",".join(["?"] * len(company_ids))
+
+        query = f"""
 
             SELECT
                 company_id,
@@ -17,12 +22,22 @@ class CompanyWebsiteRepository:
 
             FROM company_websites
 
-            WHERE website IS NOT NULL
+            WHERE company_id IN ({placeholders})
+
+            AND website IS NOT NULL
             AND website <> ''
 
             ORDER BY company_id
 
-        """)
+        """
+
+        self.db.cursor.execute(
+
+            query,
+
+            company_ids
+
+        )
 
         return self.db.cursor.fetchall()
 

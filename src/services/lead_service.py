@@ -15,12 +15,16 @@ class LeadService:
 
     def save(self, leads):
 
+        company_ids = []
+
         new_companies = 0
         updated_companies = 0
 
         for lead in leads:
 
             company_id, is_new = self.company_repo.save(lead)
+
+            company_ids.append(company_id)
 
             if is_new:
                 new_companies += 1
@@ -44,10 +48,12 @@ class LeadService:
                 for index, phone in enumerate(phones):
 
                     self.phone_repo.save(
+
                         company_id,
                         phone,
                         "Office",
                         index == 0
+
                     )
 
             # ---------- Website ----------
@@ -55,8 +61,10 @@ class LeadService:
             if lead.website:
 
                 self.website_repo.save(
+
                     company_id,
                     lead.website
+
                 )
 
             # ---------- Emails ----------
@@ -64,8 +72,10 @@ class LeadService:
             for email in lead.emails:
 
                 self.email_repo.save(
+
                     company_id,
                     email
+
                 )
 
         print("\n==============================")
@@ -74,6 +84,8 @@ class LeadService:
         print(f"New Companies     : {new_companies}")
         print(f"Updated Companies : {updated_companies}")
         print("==============================")
+
+        return company_ids
 
     def close(self):
 

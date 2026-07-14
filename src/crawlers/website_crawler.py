@@ -57,37 +57,16 @@ class WebsiteCrawler:
 
         }
 
+        # V1:
+        # Crawl ONLY Contact pages.
+        # Homepage is always scanned separately.
         self.priority_keywords = [
 
             "contact",
             "contact-us",
-            "about",
-            "about-us",
-            "reach",
-            "location",
-            "locations",
-            "company",
-            "profile",
-            "infrastructure"
-
-        ]
-
-        self.ignore_keywords = [
-
-            "product",
-            "products",
-            "category",
-            "catalog",
-            "shop",
-            "cart",
-            "gallery",
-            "portfolio",
-            "blog",
-            "news",
-            "career",
-            "job",
-            "privacy",
-            "terms"
+            "contactus",
+            "reach-us",
+            "reachus"
 
         ]
 
@@ -101,7 +80,7 @@ class WebsiteCrawler:
 
                     url,
 
-                    timeout=20,
+                    timeout=6,
 
                     verify=verify,
 
@@ -111,15 +90,15 @@ class WebsiteCrawler:
 
                 response.raise_for_status()
 
-                print("✅ Website Downloaded")
+                print(f"   ✓ Downloaded : {url}")
 
                 return response.text
 
-            except:
+            except Exception:
 
                 continue
 
-        print("❌ Failed")
+        print(f"   ✗ Failed : {url}")
 
         return None
 
@@ -145,78 +124,52 @@ class WebsiteCrawler:
 
         patterns = [
 
-            r'\+91[\s\-]?[6-9]\d{9}',
-            r'\b91[6-9]\d{9}\b',
-            r'\b[6-9]\d{9}\b',
-            r'\b0\d{2,4}[\-\s]?\d{6,8}\b'
+            r"\+91[\s\-]?[6-9]\d{9}",
+            r"\b91[6-9]\d{9}\b",
+            r"\b[6-9]\d{9}\b",
+            r"\b0\d{2,4}[\-\s]?\d{6,8}\b"
 
         ]
 
         for pattern in patterns:
 
-            matches = re.findall(pattern, html)
-
-            for phone in matches:
-
-                original = phone
+            for phone in re.findall(pattern, html):
 
                 digits = re.sub(r"\D", "", phone)
 
-                # -------------------------
-                # Normalize
-                # -------------------------
-
-                if digits.startswith("91") and len(digits) == 12:
-
-                    digits = digits[2:]
-
-                    original = "+91" + digits
-
-                elif len(digits) == 10:
-
-                    original = digits
-
-                elif digits.startswith("0"):
-
-                    original = digits
-
-                # -------------------------
-                # Validation
-                # -------------------------
-
-                if len(set(digits)) == 1:
-                    continue
-
-                if digits.startswith("000"):
-                    continue
-
-                if digits.startswith("123"):
-                    continue
+                normalized = None
 
                 if len(digits) == 10:
 
-                    if digits[0] not in "6789":
-                        continue
+                    if digits[0] in "6789":
 
-                elif len(digits) == 11:
+                        normalized = "+91" + digits
 
-                    if not digits.startswith("0"):
-                        continue
+                elif len(digits) == 12 and digits.startswith("91"):
 
-                else:
+                    normalized = "+" + digits
+
+                elif len(digits) == 11 and digits.startswith("0"):
+
+                    normalized = digits
+
+                if not normalized:
+
                     continue
 
-                # Reject sequential numbers
+                if len(set(digits)) == 1:
 
-                if digits in {
-
-                    "9876543210",
-                    "1234567890"
-
-                }:
                     continue
 
-                phones.add(original)
+                if digits.startswith("123"):
+
+                    continue
+
+                if digits.startswith("000"):
+
+                    continue
+
+                phones.add(normalized)
 
         return sorted(phones)
 
@@ -248,6 +201,8 @@ class WebsiteCrawler:
 
         pages = []
 
+        visited = set()
+
         for a in soup.find_all("a", href=True):
 
             href = a.get("href", "").strip()
@@ -262,25 +217,32 @@ class WebsiteCrawler:
 
             value = (href + " " + text).lower()
 
-            if any(word in value for word in self.ignore_keywords):
-
-                continue
-
             if not any(word in value for word in self.priority_keywords):
 
                 continue
 
             url = urljoin(base_url, href)
 
+            url = url.split("#")[0]
+
+            if url.rstrip("/") == base_url.rstrip("/"):
+
+                continue
+
             if not url.startswith("http"):
 
                 continue
 
-            if url not in pages:
+            if url in visited:
 
-                pages.append(url)
+                continue
 
-        return pages[:5]
+            visited.add(url)
+
+            pages.append(url)
+
+        # Crawl only ONE Contact page
+        return pages[:1]
 
     def crawl_page(self, url):
 
