@@ -224,4 +224,6 @@ company_page.html
 
 *.xlsx
 
+credentials.json
+
 __pycache__/
